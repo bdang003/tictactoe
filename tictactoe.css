@@ -1,0 +1,9 @@
+.row{
+    display: flex;
+    flex-direction: row;
+}
+
+.slot{
+    width: 30px;
+    height: 30px;
+}
