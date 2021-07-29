@@ -2,19 +2,19 @@ const Gameboard = (() => {
     let board = [[0,0,0],[0,0,0],[0,0,0]];
     let player = true;
     let computer = false;
-
-    const createBoard = (() => {
+    
+    const initializeBoard = (() => {
         for(let i=0; i<3; i++){
             let rowDiv = document.createElement('div');
             rowDiv.classList.add('row');
             rowDiv.id = `row${i}`;
             for(let j=0; j<3; j++){
-                let squareDiv = document.createElement('div');
-                squareDiv.id = `slot${i}${j}`;
-                squareDiv.innerHTML = `${i}${j}`;
-                squareDiv.classList.add('slot');
-                squareDiv.onclick = () => playerSelect(squareDiv.id);
-                rowDiv.appendChild(squareDiv);
+                let slotDiv = document.createElement('div');
+                slotDiv.id = `slot${i}${j}`;
+                slotDiv.innerHTML = `${i}${j}`;
+                slotDiv.classList.add('slot','unused');
+                slotDiv.onclick = () => selectPlayerSlot(slotDiv);
+                rowDiv.appendChild(slotDiv);
             }
             document.body.appendChild(rowDiv);
         }
@@ -34,10 +34,24 @@ const Gameboard = (() => {
         }
     }
     
-    const playerSelect = (slotID) => {
-        slotID = slotID.replace(/[^0-9]/g,'').split('');
-        setBoard(slotID[0],slotID[1], player);
-        checkWinStatus();
+    const selectPlayerSlot = (slotDiv) => {
+        if(slotDiv.classList[1]){
+            selectSlot(slotDiv, player);
+            if(!checkWinStatus()){
+                let choices = document.querySelectorAll('.unused');
+                if(choices.length){
+                    selectSlot(choices[randomizeComputerChoice(choices.length)], computer);
+                    checkWinStatus()
+                } 
+            }
+        }
+        console.table(board);
+    }
+
+    const selectSlot = (slotDiv, target) => {
+        let id = slotDiv.id.replace(/[^0-9]/g,'').split('');
+        target ? setBoard(id[0],id[1], player) : setBoard(id[0],id[1], computer);
+        slotDiv.classList.remove('unused');
     }
 
     const checkWinStatus = () => {
@@ -54,11 +68,15 @@ const Gameboard = (() => {
                 colCount+=board[i][j]; //checks row/col victory conditions
                 rowCount+=board[j][i];
             }
-            if(colCount===3 || rowCount===3) declareWinner(player); //declare winner by row/col if player(true)
-            else if(colCount===-3 || rowCount ===-3) declareWinner(computer); //declare winner by row/col is computer(false)
+            if(colCount===3 || rowCount===3){declareWinner(player); return player;} //declare winner by row/col if player(true)
+            else if(colCount===-3 || rowCount ===-3){declareWinner(computer); return computer;} //declare winner by row/col is computer(false)
         }
-        if(diag1===3 || diag2===3) declareWinner(player); //declare winner by diagonal if player(true)
-        else if(diag1===-3 || diag2===-3) declareWinner(computer); //declare winner by diagonal if computer(false)
+        if(diag1===3 || diag2===3){declareWinner(player); return player;} //declare winner by diagonal if player(true)
+        else if(diag1===-3 || diag2===-3){declareWinner(computer); return computer}//declare winner by diagonal if computer(false)
+    }
+
+    const randomizeComputerChoice = (max) => {
+        return Math.floor(Math.random()*max);
     }
 
     const declareWinner = (condition) => {
