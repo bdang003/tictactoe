@@ -11,7 +11,7 @@ const Gameboard = (() => {
             for(let j=0; j<3; j++){
                 let slotDiv = document.createElement('div');
                 slotDiv.id = `slot${i}${j}`;
-                slotDiv.innerHTML = `${i}${j}`;
+                slotDiv.innerHTML = '';
                 slotDiv.classList.add('slot','unused');
                 slotDiv.onclick = () => selectPlayerSlot(slotDiv);
                 rowDiv.appendChild(slotDiv);
@@ -51,6 +51,7 @@ const Gameboard = (() => {
     const selectSlot = (slotDiv, target) => {
         let id = slotDiv.id.replace(/[^0-9]/g,'').split('');
         target ? setBoard(id[0],id[1], player) : setBoard(id[0],id[1], computer);
+        target ? slotDiv.innerHTML = 'X' : slotDiv.innerHTML = 'O';
         slotDiv.classList.remove('unused');
     }
 
@@ -68,11 +69,11 @@ const Gameboard = (() => {
                 colCount+=board[i][j]; //checks row/col victory conditions
                 rowCount+=board[j][i];
             }
-            if(colCount===3 || rowCount===3){declareWinner(player); return player;} //declare winner by row/col if player(true)
-            else if(colCount===-3 || rowCount ===-3){declareWinner(computer); return computer;} //declare winner by row/col is computer(false)
+            if(colCount===3 || rowCount===3){declareWinner(player); return true;} //declare winner by row/col if player(true)
+            else if(colCount===-3 || rowCount ===-3){declareWinner(computer); return true;} //declare winner by row/col is computer(false)
         }
-        if(diag1===3 || diag2===3){declareWinner(player); return player;} //declare winner by diagonal if player(true)
-        else if(diag1===-3 || diag2===-3){declareWinner(computer); return computer}//declare winner by diagonal if computer(false)
+        if(diag1===3 || diag2===3){declareWinner(player); return true;} //declare winner by diagonal if player(true)
+        else if(diag1===-3 || diag2===-3){declareWinner(computer); return true}//declare winner by diagonal if computer(false)
     }
 
     const randomizeComputerChoice = (max) => {
@@ -80,8 +81,19 @@ const Gameboard = (() => {
     }
 
     const declareWinner = (condition) => {
-        condition ? console.log('player wins') : console.log('computer wins');
+        let modal = document.querySelector('.modal');
+        let span = document.querySelector('.close');
+        modal.style.display = 'block';
+        span.onclick = () => resetGame(modal);
     }
-    
-    return {board, resetBoard, setBoard};
+
+    const resetGame = (modal) => {
+        modal.style.display = 'none';
+        resetBoard();
+        let slotDivs = document.querySelectorAll('.slot');
+        slotDivs.forEach(element => {
+            element.innerHTML = '';
+            element.classList.add('unused');
+        });
+    }
 })();
